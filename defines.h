@@ -23,7 +23,7 @@ typedef _Bool b8;
 // size_t
 #if defined(__GNUC__) || defined(__clang__) || defined(__gcc__)
 #if defined(__x86_64__) || defined(__ppc64__)
-typedef unsigned long usize;
+typedef unsigned long long usize;
 #define USIZE_SIZE 8
 #else
 typedef unsigned int usize;
