@@ -15,6 +15,10 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Header enum
 // NOTE: DA_MAX_CAPACITY is the field that holds the maximum capacity
 // the dynamic array has ever reached. Currently, I believe this will
@@ -263,6 +267,7 @@ INLINE void* da_insert(void* da_data, void* data, u64 index) {
 }
 
 INLINE void da_remove(void* da_data, u64 index);
+INLINE void da_remove_swap(void* da_data, u64 index);
 
 /**
  * @brief Append darray B at the end of darray A.
@@ -346,3 +351,7 @@ INLINE void da_free(void* da_data) {
 
     free(header);
 }
+
+#ifdef __cplusplus
+}
+#endif

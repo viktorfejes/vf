@@ -1,3 +1,13 @@
+/**
+ * @file defines.h
+ * @author Viktor Fejes (viktor@viktorfejes.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-05-08
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #pragma once
 
 // Unsigned int types.
