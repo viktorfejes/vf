@@ -79,9 +79,9 @@ unsigned char darray_push_and_insert_and_swap() {
     // Creating exact size darray
     int* my_darray = da_alloc_exact(16, sizeof(int));
 
-    my_darray = da_push_back(my_darray, 42);
-    my_darray = da_push_back(my_darray, 16);
-    my_darray = da_push_back(my_darray, 32);
+    my_darray = da_push_back(my_darray, &(int) { 42 });
+    my_darray = da_push_back(my_darray, &(int) { 16 });
+    my_darray = da_push_back(my_darray, &(int) { 32 });
     REQUIRE_TO_BE(3, da_count(my_darray));
     REQUIRE_TO_BE(42, my_darray[0]);
     REQUIRE_TO_BE(16, my_darray[1]);

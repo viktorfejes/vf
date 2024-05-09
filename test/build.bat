@@ -9,7 +9,7 @@ FOR /R %%f in (*.c) do (SET cFilenames=!cFilenames! %%f)
 REM echo "Files:" %cFilenames%
 
 SET assembly=tests
-SET compilerFlags=-g -Wno-missing-braces -Wall -ggdb
+SET compilerFlags=-g -Wno-missing-braces -Wall -ggdb -MD
 REM -Wall -Werror -save-temps=obj -O0
 SET includeFlags=-Isrc -I../
 SET linkerFlags=

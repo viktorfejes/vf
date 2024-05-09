@@ -61,6 +61,21 @@ INLINE void* da_alloc(u64 stride) {
 }
 
 /**
+ * @brief Frees the memory allocated by the Dynamic Array
+ *
+ * @param da_data Pointer to the data part of the darray
+ */
+INLINE void da_free(void* da_data) {
+    u64* header = (u64*)da_data - DA_HEADER_LENGTH;
+    header[DA_STRIDE] = 0;
+    header[DA_CAPACITY] = 0;
+    header[DA_COUNT] = 0;
+    header[DA_MAX_CAPACITY] = 0;
+
+    free(header);
+}
+
+/**
  * @brief Fetches a field of the header.
  *
  * @private
@@ -197,7 +212,7 @@ INLINE void* da_resize(void* da_data, u64 new_capacity, i32 default_value) {
  * @param data Pointer to the element to be pushed in.
  * @return The pointer to the darray data.
  */
-INLINE void* da_push_back(void* da_data, void* data) {
+INLINE void* da_push_back(void* da_data, const void* data) {
     u64* header = (u64*)da_data - DA_HEADER_LENGTH;
 
     // Check if we need to resize the darray
@@ -208,6 +223,8 @@ INLINE void* da_push_back(void* da_data, void* data) {
     u64 addr = (u64)da_data;
     addr += (header[DA_COUNT] * header[DA_STRIDE]);
     mem_copy((void*)addr, data, header[DA_STRIDE]);
+
+    header[DA_COUNT]++;
 
     return da_data;
 }
@@ -336,21 +353,6 @@ INLINE void da_swap(void* da_data, u64 index_a, u64 index_b) {
 }
 
 #define da_foreach()
-
-/**
- * @brief Frees the memory allocated by the Dynamic Array
- *
- * @param da_data Pointer to the data part of the darray
- */
-INLINE void da_free(void* da_data) {
-    u64* header = (u64*)da_data - DA_HEADER_LENGTH;
-    header[DA_STRIDE] = 0;
-    header[DA_CAPACITY] = 0;
-    header[DA_COUNT] = 0;
-    header[DA_MAX_CAPACITY] = 0;
-
-    free(header);
-}
 
 #ifdef __cplusplus
 }
