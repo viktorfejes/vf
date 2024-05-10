@@ -2,11 +2,9 @@
 
 #include "defines.h"
 #include "mem.h"
+#include "str.h"
 
 #include <stdlib.h>
-
-// TODO: temp!
-#include <string.h>
 
 // NOTE: Handling collisions with chaining
 typedef struct hashmap_bucket {
@@ -123,11 +121,10 @@ INLINE hashmap* hashmap_insert(hashmap* hm, const char* key, void* value, u64 si
 
     // If the index already exist, and the key is not the same
     // chain it... (this is a collision!)
-    // TODO: we need string comparison here!
-    if (hm->buckets[index].key && hm->buckets[index].key != key) {
+    if (hm->buckets[index].key && str_cmp(hm->buckets[index].key, key) != 0) {
         // Create a new bucket...
         hashmap_bucket* new_bucket = (hashmap_bucket*)malloc(sizeof(hashmap_bucket));
-        new_bucket->key = strdup(key); // TODO: own implementation
+        new_bucket->key = str_dup(key);
         new_bucket->value = malloc(size);
         mem_copy(new_bucket->value, value, size);
 
@@ -135,7 +132,7 @@ INLINE hashmap* hashmap_insert(hashmap* hm, const char* key, void* value, u64 si
         new_bucket->next = hm->buckets[index].next;
         hm->buckets[index].next = new_bucket;
     } else {
-        hm->buckets[index].key = strdup(key); // TODO: own implementation
+        hm->buckets[index].key = str_dup(key);
         hm->buckets[index].value = malloc(size);
         mem_copy(hm->buckets[index].value, value, size);
     }
