@@ -30,6 +30,14 @@ typedef struct mutex {
 #endif
 } mutex;
 
+/**
+ * @brief Spawns a new thread with the supplied function pointer and arguments.
+ * 
+ * @param th The thread struct to use.
+ * @param func Function pointer to the function.
+ * @param arg Arguments for the function pointer.
+ * @return u32 Result code.
+ */
 INLINE u32 thread_create(thread* th, void* (*func)(void*), void* arg) {
     th->func = func;
     th->arg = arg;
@@ -41,6 +49,12 @@ INLINE u32 thread_create(thread* th, void* (*func)(void*), void* arg) {
 #endif
 }
 
+/**
+ * @brief Waits for the thread and joins it into the main thread.
+ * 
+ * @param th The thread to join.
+ * @return u32 Result code.
+ */
 INLINE u32 thread_join(thread* th) {
 #ifdef _WIN32
     DWORD ret = WaitForSingleObject(th->handle, INFINITE);
@@ -52,10 +66,67 @@ INLINE u32 thread_join(thread* th) {
 #endif
 }
 
+/**
+ * @brief Sleeps the current thread.
+ * 
+ * @param ms Duration in milliseconds.
+ */
 INLINE void thread_sleep(u32 ms) {
 #ifdef _WIN32
     Sleep(ms);
 #else
     usleep(ms * 1000);
+#endif
+}
+
+/**
+ * @brief Initializes the selected mutex.
+ * 
+ * @param mtx The mutex to initialize.
+ */
+INLINE void mutex_init(mutex* mtx) {
+#ifdef _WIN32
+    InitializeCriticalSection(&mtx->cs);
+#else
+    pthread_mutex_init(&mtx->mtx, NULL);
+#endif
+}
+
+/**
+ * @brief Destroy the selected mutex.
+ * 
+ * @param mtx Mutex to destroy.
+ */
+INLINE void mutex_destroy(mutex* mtx) {
+#ifdef _WIN32
+    DeleteCriticalSection(&mtx->cs);
+#else
+    pthread_mutex_destroy(&mtx->mtx);
+#endif
+}
+
+/**
+ * @brief Locks the mutex.
+ * 
+ * @param mtx Mutex to lock
+ */
+INLINE void mutex_lock(mutex* mtx) {
+#ifdef _WIN32
+    EnterCriticalSection(&mtx->cs);
+#else
+    pthread_mutex_lock(&mtx->mtx);
+#endif
+}
+
+/**
+ * @brief Unlocks the mutex.
+ * 
+ * @param mtx Mutex to unlock.
+ */
+INLINE void mutex_unlock(mutex* mtx) {
+#ifdef _WIN32
+    LeaveCriticalSection(&mtx->cs);
+#else
+    pthread_mutex_unlock(&mtx->mtx);
 #endif
 }
