@@ -1,3 +1,7 @@
+CFLAGS = -g -Wall -MD
+
+
+
 DIR := $(subst /,\,${CURDIR})
 BUILD_DIR := build/bin
 OBJ_DIR := build/obj

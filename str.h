@@ -31,9 +31,9 @@ INLINE u64 str_len(const char* str) {
  * 
  * @param str_a C string to be compared.
  * @param str_b C string to be compared.
- * @return u32 Returns a value indicating the relationship between the strings.
+ * @return i32 Returns a value indicating the relationship between the strings.
  */
-INLINE u32 str_cmp(const char* str_a, const char* str_b) {
+INLINE i32 str_cmp(const char* str_a, const char* str_b) {
     u64 i = 0;
     while (str_a[i] != '\0' && str_b[i] != '\0') {
         if (str_a[i] != str_b[i]) {

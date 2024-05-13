@@ -46,9 +46,9 @@ typedef struct mutex {
  * @param th The thread struct to use.
  * @param func Function pointer to the function.
  * @param arg Arguments for the function pointer.
- * @return u32 Result code.
+ * @return i32 Result code.
  */
-INLINE u32 thread_create(thread* th, void* (*func)(void*), void* arg) {
+INLINE i32 thread_create(thread* th, void* (*func)(void*), void* arg) {
     th->func = func;
     th->arg = arg;
 #ifdef _WIN32
@@ -63,9 +63,9 @@ INLINE u32 thread_create(thread* th, void* (*func)(void*), void* arg) {
  * @brief Waits for the thread and joins it into the main thread.
  * 
  * @param th The thread to join.
- * @return u32 Result code.
+ * @return i32 Result code.
  */
-INLINE u32 thread_join(thread* th) {
+INLINE i32 thread_join(thread* th) {
 #ifdef _WIN32
     DWORD ret = WaitForSingleObject(th->handle, INFINITE);
     CloseHandle(th->handle);
