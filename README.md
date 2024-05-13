@@ -8,3 +8,4 @@ Types, containers, algorithms, and anything similar collected into my own librar
 - Sparse Set (sparse_set.h)
 - Memory (mem.h)
 - Threads & Mutexes (thread.h)
+- Timer (timer.h)
