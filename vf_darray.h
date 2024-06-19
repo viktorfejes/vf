@@ -3,11 +3,12 @@
 *   Header-only tiny dynamic array implementation.
 *
 *   RECENT CHANGES:
-*       0.2     (2024-06-18)    Added `vf_` prefix to function names;
+*       0.2     (2024-06-19)    Added `vf_` prefix to function names;
 *                               Improved header-only implementation;
-                                Removed non-standard dependencies;
-                                Rewrote `da_resize`;
-                                Added `vf_memswap` static function;
+*                               Removed non-standard dependencies;
+*                               Rewrote `vf_da_resize`;
+*                               Added `_vf_memswap` private static function;
+*                               Added `_vf_header_set` private static function for convenience;
 *
 *   LICENSE: MIT License
 *       Copyright (c) 2024 Viktor Fejes
@@ -29,6 +30,12 @@
 *       LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 *       OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 *       SOFTWARE.
+*
+*   TODOs:
+*       - [ ] Add macros for easy type casting.
+*       - [ ] Add prefix to enums to avoid collisions.
+*       - [ ] Provide macro for malloc for easy user-side swap.
+*       - [ ] Revisit resize/reserve...
 *
  */
 
@@ -64,7 +71,7 @@ enum { DA_STRIDE, DA_COUNT, DA_CAPACITY, DA_MAX_CAPACITY, DA_HEADER_LENGTH };
  * @param stride Size of the element the darray will hold.
  * @return Returns a pointer to the data right after the header.
  */
-extern void* da_alloc_exact(size_t capacity, size_t stride);
+extern void* vf_da_alloc_exact(size_t capacity, size_t stride);
 
 /**
  * @brief Function to create Dynamic Array at default capacity
@@ -73,25 +80,14 @@ extern void* da_alloc_exact(size_t capacity, size_t stride);
  * @return Pointer to the data (right after header)
  * @note Uses `da_alloc_exact` under the hood.
  */
-extern void* da_alloc(size_t stride);
+extern void* vf_da_alloc(size_t stride);
 
 /**
  * @brief Frees the memory allocated by the Dynamic Array
  *
  * @param da_data Pointer to the data part of the darray
  */
-extern void da_free(void* da_data);
-
-/**
- * @brief Fetches a field of the header.
- *
- * @private
- *
- * @param da_data Pointer to the darray data.
- * @param field Enum of the field to get from the header.
- * @return The value of the field.
- */
-extern size_t _da_header_get(const void* da_data, size_t field);
+extern void vf_da_free(void* da_data);
 
 /**
  * @brief Returns the current number of elements of a Dynamic Array
@@ -99,7 +95,7 @@ extern size_t _da_header_get(const void* da_data, size_t field);
  * @param da_data Pointer to the darray data.
  * @return The number of elements.
  */
-extern size_t da_count(const void* da_data);
+extern size_t vf_da_count(const void* da_data);
 
 /**
  * @brief Returns the number of elements that can be held in currently allocated storage
@@ -107,7 +103,7 @@ extern size_t da_count(const void* da_data);
  * @param da_data Pointer to the darray data.
  * @return The capacity of the darray.
  */
-extern size_t da_capacity(const void* da_data);
+extern size_t vf_da_capacity(const void* da_data);
 
 /**
  * @brief Returns size of a single element in bytes.
@@ -115,7 +111,7 @@ extern size_t da_capacity(const void* da_data);
  * @param da_data Pointer to the darray data.
  * @return size_t The size of a single element in bytes.
  */
-extern size_t da_stride(const void* da_data);
+extern size_t vf_da_stride(const void* da_data);
 
 /**
  * @brief Checks whether the darray is empty. In this case empty means it has
@@ -124,7 +120,7 @@ extern size_t da_stride(const void* da_data);
  * @param da_data Pointer to the darray data.
  * @return bool `true` if array is empty, `false` if not.
  */
-extern bool da_is_empty(const void* da_data);
+extern bool vf_da_is_empty(const void* da_data);
 
 /**
  * @brief Increases the capacity of a Dynamic Array.
@@ -135,7 +131,7 @@ extern bool da_is_empty(const void* da_data);
  * If the new desired capacity is less than or equal to old capacity,
  * no allocation/movement takes place.
  */
-extern void* da_reserve(void* da_data, size_t new_capacity);
+extern void* vf_da_reserve(void* da_data, size_t new_capacity);
 
 /**
  * @todo Make sure it does NOTHING if new_capacity == old_capacity
@@ -150,7 +146,7 @@ extern void* da_reserve(void* da_data, size_t new_capacity);
  * @param new_capacity New capacity of the container.
  * @return void* Returns darray data.
  */
-extern void* da_resize(void* da_data, size_t new_capacity);
+extern void* vf_da_resize(void* da_data, size_t new_capacity);
 
 /**
  * @brief Adds an element to the end of the array.
@@ -159,7 +155,7 @@ extern void* da_resize(void* da_data, size_t new_capacity);
  * @param data Pointer to the element to be pushed in.
  * @return The pointer to the darray data.
  */
-extern void* da_push_back(void* da_data, const void* data);
+extern void* vf_da_push_back(void* da_data, const void* data);
 
 /**
  * @brief Remove the last element of the darray.
@@ -169,7 +165,7 @@ extern void* da_push_back(void* da_data, const void* data);
  * @param da_data Pointer to the darray data.
  * @return void* The pointer to the darray data.
  */
-extern void* da_pop_back(void* da_data);
+extern void* vf_da_pop_back(void* da_data);
 
 /**
  * @brief Inserts an element at a given index into the darray.
@@ -179,10 +175,10 @@ extern void* da_pop_back(void* da_data);
  * @param index Index of insertion
  * @return void* The pointer to the darray data.
  */
-extern void* da_insert(void* da_data, void* data, size_t index);
+extern void* vf_da_insert(void* da_data, void* data, size_t index);
 
-extern void da_remove(void* da_data, size_t index);
-extern void da_remove_swap(void* da_data, size_t index);
+extern void vf_da_remove(void* da_data, size_t index);
+extern void vf_da_remove_swap(void* da_data, size_t index);
 
 /**
  * @brief Append darray B at the end of darray A.
@@ -193,14 +189,14 @@ extern void da_remove_swap(void* da_data, size_t index);
  * @param da_data_b Pointer to darray B data.
  * @return void* The pointer to darray A data.
  */
-extern void* da_append(void* da_data_a, void* da_data_b);
+extern void* vf_da_append(void* da_data_a, void* da_data_b);
 
 /**
  * @brief Clears the contents of the darray by setting the count to 0.
  *
  * @param da_data Pointer to the darray data.
  */
-extern void da_clear(void* da_data);
+extern void vf_da_clear(void* da_data);
 
 /**
  * @brief Swaps two elements of a Dynamic Array with one another.
@@ -209,7 +205,7 @@ extern void da_clear(void* da_data);
  * @param index_a First index.
  * @param index_b Second index.
  */
-extern void da_swap(void* da_data, size_t index_a, size_t index_b);
+extern void vf_da_swap(void* da_data, size_t index_a, size_t index_b);
 
 #define da_foreach()
 
@@ -221,7 +217,7 @@ extern void da_swap(void* da_data, size_t index_a, size_t index_b);
 #ifdef VF_DARRAY_IMPLEMENTATION
 
 // Memswap implementation...
-static void vf_memswap(void* ptr_a, void* ptr_b, size_t size) {
+static void _vf_memswap(void* ptr_a, void* ptr_b, size_t size) {
     unsigned char* a = (unsigned char*)ptr_a;
     unsigned char* b = (unsigned char*)ptr_b;
     unsigned char temp;
@@ -233,7 +229,26 @@ static void vf_memswap(void* ptr_a, void* ptr_b, size_t size) {
     }
 }
 
-void* da_alloc_exact(size_t capacity, size_t stride) {
+/**
+ * @brief Fetches a field of the header.
+ *
+ * @private
+ *
+ * @param da_data Pointer to the darray data.
+ * @param field Enum of the field to get from the header.
+ * @return The value of the field.
+ */
+static size_t _vf_da_header_get(const void* da_data, size_t field) {
+    size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
+    return header[field];
+}
+
+static void _vf_da_header_set(void* array, size_t field, size_t value) {
+    size_t* header = (size_t*)array - DA_HEADER_LENGTH;
+    header[field] = value;
+}
+
+void* vf_da_alloc_exact(size_t capacity, size_t stride) {
     size_t header_size = sizeof(size_t) * DA_HEADER_LENGTH;
     size_t* darray = (size_t*)malloc(header_size + (stride * capacity));
 
@@ -245,11 +260,11 @@ void* da_alloc_exact(size_t capacity, size_t stride) {
     return (void*)(darray + DA_HEADER_LENGTH);
 }
 
-void* da_alloc(size_t stride) {
-    return da_alloc_exact(DA_DEFAULT_CAPACITY, stride);
+void* vf_da_alloc(size_t stride) {
+    return vf_da_alloc_exact(DA_DEFAULT_CAPACITY, stride);
 }
 
-void da_free(void* da_data) {
+void vf_da_free(void* da_data) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
     header[DA_STRIDE] = 0;
     header[DA_CAPACITY] = 0;
@@ -259,31 +274,25 @@ void da_free(void* da_data) {
     free(header);
 }
 
-size_t _da_header_get(const void* da_data, size_t field) {
-    size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
-    return header[field];
+size_t vf_da_count(const void* da_data) {
+    return _vf_da_header_get(da_data, DA_COUNT);
 }
 
-size_t da_count(const void* da_data) {
-    size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
-    return header[DA_COUNT];
-}
-
-size_t da_capacity(const void* da_data) {
+size_t vf_da_capacity(const void* da_data) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
     return header[DA_CAPACITY];
 }
 
-size_t da_stride(const void* da_data) {
+size_t vf_da_stride(const void* da_data) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
     return header[DA_STRIDE];
 }
 
-bool da_is_empty(const void* da_data) {
-    return (da_count(da_data) == 0) ? true : false;
+bool vf_da_is_empty(const void* da_data) {
+    return (vf_da_count(da_data) == 0) ? true : false;
 }
 
-void* da_reserve(void* da_data, size_t new_capacity) {
+void* vf_da_reserve(void* da_data, size_t new_capacity) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
 
     if (header[DA_CAPACITY] >= new_capacity) {
@@ -305,10 +314,10 @@ void* da_reserve(void* da_data, size_t new_capacity) {
     return new_da_data;
 }
 
-void* da_resize(void* da_data, size_t new_capacity) {
-    size_t len = da_count(da_data);
-    size_t stride = da_stride(da_data);
-    size_t capacity = da_capacity(da_data);
+void* vf_da_resize(void* da_data, size_t new_capacity) {
+    size_t len = vf_da_count(da_data);
+    size_t stride = vf_da_stride(da_data);
+    size_t capacity = vf_da_capacity(da_data);
 
     // If the new capacity is less than the current capacity,
     // the capacity field of the header simply gets changed.
@@ -317,33 +326,34 @@ void* da_resize(void* da_data, size_t new_capacity) {
         return da_data;
     }
 
-    void* new_da = da_alloc_exact(new_capacity, stride);
+    void* new_da = vf_da_alloc_exact(new_capacity, stride);
     memcpy(new_da, da_data, len * stride);
-    da_free(da_data);
+    vf_da_free(da_data);
 
     return new_da;
 }
 
-void* da_push_back(void* da_data, const void* data) {
-    size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
+void* vf_da_push_back(void* da_data, const void* data) {
+    size_t len = vf_da_count(da_data);
+    size_t stride = vf_da_stride(da_data);
+    size_t capacity = vf_da_capacity(da_data);
 
     // Check if we need to resize the darray
-    if (header[DA_COUNT] >= header[DA_CAPACITY]) {
-        da_data = da_reserve(da_data, header[DA_CAPACITY] * DA_RESIZE_FACTOR);
+    if (len >= capacity) {
+        da_data = vf_da_reserve(da_data, capacity * DA_RESIZE_FACTOR);
     }
 
     size_t addr = (size_t)da_data;
-    addr += (header[DA_COUNT] * header[DA_STRIDE]);
-    memcpy((void*)addr, data, header[DA_STRIDE]);
-
-    header[DA_COUNT]++;
+    addr += (len * stride);
+    memcpy((void*)addr, data, stride);
+    _vf_da_header_set(da_data, DA_COUNT, len + 1);
 
     return da_data;
 }
 
-void* da_pop_back(void* da_data) {
+void* vf_da_pop_back(void* da_data) {
     // Only do pop_back if the darray is not empty
-    if (!da_is_empty(da_data)) {
+    if (!vf_da_is_empty(da_data)) {
         // All we need to do is decrement the count
         size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
         header[DA_COUNT]--;
@@ -352,17 +362,17 @@ void* da_pop_back(void* da_data) {
     return da_data;
 }
 
-void* da_insert(void* da_data, void* data, size_t index) {
+void* vf_da_insert(void* da_data, void* data, size_t index) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
-    size_t capacity = da_capacity(da_data);
-    size_t stride = da_stride(da_data);
-    size_t count = da_count(da_data);
+    size_t capacity = vf_da_capacity(da_data);
+    size_t stride = vf_da_stride(da_data);
+    size_t count = vf_da_count(da_data);
 
     // Check if we have enough space to insert an element
     // If not, we reserve more
     if (count >= capacity) {
         header[DA_CAPACITY] = capacity * DA_RESIZE_FACTOR;
-        da_data = da_reserve(da_data, header[DA_CAPACITY]);
+        da_data = vf_da_reserve(da_data, header[DA_CAPACITY]);
     }
 
     // Move everything by one
@@ -382,7 +392,7 @@ void* da_insert(void* da_data, void* data, size_t index) {
 // void da_remove(void* da_data, size_t index) {}
 // void da_remove_swap(void* da_data, size_t index) {}
 
-void* da_append(void* da_data_a, void* da_data_b) {
+void* vf_da_append(void* da_data_a, void* da_data_b) {
     size_t* header_a = (size_t*)da_data_a - DA_HEADER_LENGTH;
     size_t* header_b = (size_t*)da_data_b - DA_HEADER_LENGTH;
 
@@ -398,7 +408,7 @@ void* da_append(void* da_data_a, void* da_data_b) {
     // otherwise the next push or insert will trigger a reallocation.
     if (header_a[DA_CAPACITY] < (header_a[DA_CAPACITY] + header_b[DA_CAPACITY])) {
         header_a[DA_CAPACITY] = header_a[DA_CAPACITY] + header_b[DA_CAPACITY];
-        da_data_a = da_reserve(da_data_a, header_a[DA_CAPACITY]);
+        da_data_a = vf_da_reserve(da_data_a, header_a[DA_CAPACITY]);
     }
 
     // Copy B into A
@@ -410,19 +420,19 @@ void* da_append(void* da_data_a, void* da_data_b) {
     header_a[DA_COUNT] = header_a[DA_COUNT] + header_b[DA_COUNT];
 
     // Free B
-    da_free(da_data_b);
+    vf_da_free(da_data_b);
 
     return da_data_a;
 }
 
-void da_clear(void* da_data) {
+void vf_da_clear(void* da_data) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
     header[DA_COUNT] = 0;
 }
 
-void da_swap(void* da_data, size_t index_a, size_t index_b) {
+void vf_da_swap(void* da_data, size_t index_a, size_t index_b) {
     size_t* header = (size_t*)da_data - DA_HEADER_LENGTH;
-    vf_memswap((uint8_t*)da_data + (header[DA_STRIDE] * index_a),
+    _vf_memswap((uint8_t*)da_data + (header[DA_STRIDE] * index_a),
              (uint8_t*)da_data + (header[DA_STRIDE] * index_b),
              header[DA_STRIDE]);
 }
