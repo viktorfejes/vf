@@ -3,6 +3,7 @@
 *   Header-only tiny logger library.
 *
 *   RECENT CHANGES:
+*       0.11    (2024-06-19)    Added `extern C`;
 *       0.1     (2024-06-19)    Creation;
 *
 *   LICENSE: MIT License
@@ -35,6 +36,10 @@
 */
 #ifndef VF_LOG_H
 #define VF_LOG_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -125,6 +130,10 @@ extern void _vf_log_message(int level, const char* file, int line, const char* f
 #define _VF_LOG_ERROR(...) _vf_log_message(VF_LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__);
 #else
 #define VF_LOG_ERROR(...)
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 // END OF HEADER. ------------------------------------------------------------------------

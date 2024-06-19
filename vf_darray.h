@@ -1,8 +1,9 @@
 /*
-*   vf_darray - v0.2
+*   vf_darray - v0.21
 *   Header-only tiny dynamic array implementation.
 *
 *   RECENT CHANGES:
+*       0.21    (2024-06-19)    Removed unnecessary `#pragma once`;
 *       0.2     (2024-06-19)    Added `vf_` prefix to function names;
 *                               Improved header-only implementation;
 *                               Removed non-standard dependencies;
@@ -51,7 +52,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#pragma once
 
 // Header enum
 // NOTE: DA_MAX_CAPACITY is the field that holds the maximum capacity
