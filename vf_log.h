@@ -4,6 +4,7 @@
 *
 *   RECENT CHANGES:
 *       0.11    (2024-06-19)    Added `extern C`;
+*                               Changed config parameter to pointer in `init`;
 *       0.1     (2024-06-19)    Creation;
 *
 *   LICENSE: MIT License
@@ -98,7 +99,7 @@ typedef struct {
 } vf_log_config;
 
 // Init, shutdown
-extern bool vf_log_init(vf_log_config config);
+extern bool vf_log_init(vf_log_config* config);
 extern void vf_log_shutdown(void);
 
 // Private logging functions. Use through provided macros!
@@ -166,7 +167,7 @@ static const char* vf_log_level_color[VF_LOG_LEVELS + 1] = {
 #define VF_LOG_TERM_RESET       "\033[0m"
 #define VF_LOG_TERM_UNDERLINE   "\033[4m"
 
-bool vf_log_init(vf_log_config config) {
+bool vf_log_init(vf_log_config* config) {
     if (vf_log_initialized) {
         return false;
     }
@@ -174,15 +175,15 @@ bool vf_log_init(vf_log_config config) {
     vf_log_initialized = true;
 
     for (int i = 0; i < VF_LOG_LEVELS; ++i) {
-        _vf_log_internal_state.display_file[i] = config.display_file[i];
-        _vf_log_internal_state.display_func[i] = config.display_func[i];
-        _vf_log_internal_state.display_line[i] = config.display_line[i];
-        _vf_log_internal_state.outputs[i] = config.outputs[i];
+        _vf_log_internal_state.display_file[i] = config->display_file[i];
+        _vf_log_internal_state.display_func[i] = config->display_func[i];
+        _vf_log_internal_state.display_line[i] = config->display_line[i];
+        _vf_log_internal_state.outputs[i] = config->outputs[i];
     }
 
-    _vf_log_internal_state.logfile_path = config.logfile_path;
+    _vf_log_internal_state.logfile_path = config->logfile_path;
 
-    _vf_log_internal_state.handle = config.handle;
+    _vf_log_internal_state.handle = config->handle;
 
     return true;
 }
