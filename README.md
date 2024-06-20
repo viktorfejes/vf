@@ -8,3 +8,4 @@ Small (hopefully portable) header-only libraries that can be useful for tiny C/C
 | [vf_log.h](/vf_log.h) | 0.11 | Library for small logging needs. |
 | [vf_memory.h](/vf_memory.h) | 0.21 | Recreation of some of the standard library memory functions, like `memcpy`, `memset`, etc... |
 | [vf_queue.h](/vf_queue.h) | 0.2 | Container library for queue. |
+| [vf_test.h](/vf_test.h) | 0.1 | Tiny unit test library for C/C++. |
