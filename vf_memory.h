@@ -1,11 +1,12 @@
 /*
-*   vf_memory - v0.2
+*   vf_memory - v0.21
 *   Header-only tiny memory library.
 *
 *   RECENT CHANGES:
-*       0.2 (2024-06-17)    Added `vf_` prefix to function names;
-*                           Improved header-only implementation;
-*                           Changed indices to pointers.
+*       0.21    (2024-06-18)    Changed filename to `vf_memory.h`;
+*       0.2     (2024-06-17)    Added `vf_` prefix to function names;
+*                               Improved header-only implementation;
+*                               Changed indices to pointers.
 *
 *   LICENSE: MIT License
 *       Copyright (c) 2024 Viktor Fejes

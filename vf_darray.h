@@ -351,6 +351,7 @@ void* vf_da_push_back(void* da_data, const void* data) {
     return da_data;
 }
 
+// TODO: This might need to return the popped value as a copy or something
 void* vf_da_pop_back(void* da_data) {
     // Only do pop_back if the darray is not empty
     if (!vf_da_is_empty(da_data)) {

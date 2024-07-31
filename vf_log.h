@@ -1,5 +1,5 @@
 /*
-*   vf_log - v0.1
+*   vf_log - v0.11
 *   Header-only tiny logger library.
 *
 *   RECENT CHANGES:

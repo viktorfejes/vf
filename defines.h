@@ -28,7 +28,7 @@ typedef double f64;
 
 // Bool types
 typedef int b32;
-typedef _Bool b8;
+typedef unsigned char b8;
 
 // size_t
 #if defined(__GNUC__) || defined(__clang__) || defined(__gcc__)

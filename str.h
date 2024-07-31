@@ -35,6 +35,9 @@ INLINE u64 str_len(const char* str) {
  */
 INLINE i32 str_cmp(const char* str_a, const char* str_b) {
     u64 i = 0;
+    char* a = (char*)str_a;
+    char* b = (char*)str_b;
+    while (*a != '\0' && *b !=)
     while (str_a[i] != '\0' && str_b[i] != '\0') {
         if (str_a[i] != str_b[i]) {
             return str_a[i] - str_b[i];

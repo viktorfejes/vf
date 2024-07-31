@@ -2,7 +2,7 @@
  * @file timer.h
  * @author Viktor Fejes (viktor@viktorfejes.com)
  * @brief 
- * @version 0.1
+ * @version 0.2
  * @date 2024-05-12
  * 
  * @copyright Copyright (c) 2024
@@ -26,20 +26,23 @@ typedef struct timer {
 #else
     u64 start_time;
 #endif
-} timer;
+    b8 is_running;
+} timer_t;
 
 /**
  * @brief Starts a timer.
  * 
  * @param timer Timer to start
  */
-INLINE void timer_start(timer* timer) {
+INLINE void timer_start(timer_t* timer) {
 #ifdef _WIN32
     QueryPerformanceFrequency(&timer->frequency);
     QueryPerformanceCounter(&timer->start_time);
 #else
     clock_gettime(CLOCK_MONOTONIC, &timer->start_time);
 #endif
+
+    timer->is_running = true;
 }
 
 /**
@@ -48,7 +51,11 @@ INLINE void timer_start(timer* timer) {
  * @param timer Timer struct to use.
  * @return double Elapsed time.
  */
-INLINE double timer_elapsed(timer* timer) {
+INLINE double timer_elapsed(timer_t* timer) {
+    if (!timer->is_running) {
+        return 0.0;
+    }
+
 #ifdef _WIN32
     LARGE_INTEGER current_time;
     QueryPerformanceCounter(&current_time);
@@ -62,4 +69,21 @@ INLINE double timer_elapsed(timer* timer) {
 #endif
 
     return elapsed;
+}
+
+/**
+ * @brief Stops the timer by zeroing it out and marking it as not running.
+ * 
+ * @param timer Timer to stop.
+ */
+INLINE void timer_stop(timer_t* timer) {
+    timer->is_running = false;
+
+#ifdef _WIN32
+    // NOTE: not sure, if this is correct `{}`
+    timer->start_time = {};
+    timer->frequency = {};
+#else
+    timer->start_time = 0;
+#endif
 }

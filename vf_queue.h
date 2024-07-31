@@ -1,5 +1,5 @@
 /*
-*   vf_queue - v0.1
+*   vf_queue - v0.2
 *   Header-only tiny queue library.
 *
 *   RECENT CHANGES:
@@ -34,6 +34,8 @@
 *       - [ ] Rethink the way push works. Currently it points,
 *             and it should copy, I think...
 *       - [ ] Push currently silently fails if full. Could be improved...
+*       - [ ] Maybe Pop should be a copy as well, because the pointer
+*             will eventually get invalidated.
 *
  */
 
@@ -55,7 +57,6 @@ typedef struct {
     size_t capacity;
 } vf_queue_t;
 
-extern vf_queue_t* vf_queue_create(size_t capacity, size_t data_size);
 extern vf_queue_t* vf_queue_create(size_t capacity, size_t data_size);
 extern uint8_t vf_queue_empty(vf_queue_t* queue);
 extern uint8_t vf_queue_full(vf_queue_t* queue);
