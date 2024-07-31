@@ -4,6 +4,7 @@
 #include "test_vf_darray.h"
 #include "test_vf_queue.h"
 #include "test_vf_hashmap.h"
+#include "test_vf_binaryheap.h"
 
 int main(void) {
     RUN_ALL_TESTS();
