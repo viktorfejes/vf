@@ -1,9 +1,14 @@
 /*
-*   vf_hashmap - v0.1
+*   vf_hashmap - v0.2
 *   Header-only tiny hashmap library using 64-bit FNV-1a hash
 *   and open addressing with linear probing to handle collisions.
 *
 *   RECENT CHANGES:
+*       0.2     (2024-07-31)    Added _has(key) function to check if a key exists;
+                                Changed _get to return immutable, and added _get_mutable;
+                                Renamed _insert to _set;
+                                Renamed _erase to _remove;
+                                Insert function now copies and not just points;
 *       0.1     (2024-07-30)    Finalized the implementation;
 *
 *   LICENSE: MIT License
@@ -54,13 +59,16 @@ typedef struct {
     vf_hashmap_entry_t* entries;
     size_t capacity;
     size_t size;
+    size_t value_size;
 } vf_hashmap_t;
 
-extern vf_hashmap_t* vf_hashmap_create(void);
+extern vf_hashmap_t* vf_hashmap_create(size_t value_size);
 extern void vf_hashmap_free(vf_hashmap_t* map);
-extern int vf_hashmap_insert(vf_hashmap_t* map, const char* key, void* value);
-extern void* vf_hashmap_get(vf_hashmap_t* map, const char* key);
-extern void vf_hashmap_erase(vf_hashmap_t* map, const char* key);
+extern int vf_hashmap_set(vf_hashmap_t* map, const char* key, void* value);
+extern int vf_hashmap_has(vf_hashmap_t* map, const char* key);
+extern const void* vf_hashmap_get(vf_hashmap_t* map, const char* key);
+extern void* vf_hashmap_get_mutable(vf_hashmap_t* map, const char* key);
+extern void vf_hashmap_remove(vf_hashmap_t* map, const char* key);
 extern size_t vf_hashmap_size(vf_hashmap_t* map);
 extern size_t vf_hashmap_capacity(vf_hashmap_t* map);
 
@@ -85,13 +93,14 @@ static uint64_t _hash_key(const char* key) {
     return hash;
 }
 
-static int _hashmap_set_entry(vf_hashmap_entry_t* entries, size_t capacity, const char* key, void* value, size_t* plength) {
+static int _hashmap_set_entry(vf_hashmap_t* map, vf_hashmap_entry_t* entries, size_t capacity, const char* key, void* value, size_t* plength) {
     uint64_t hash = _hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(capacity - 1));
 
     while (entries[index].key != NULL) {
         if (strcmp(key, entries[index].key) == 0) {
-            entries[index].value = value;
+            // Update existing entry
+            memcpy(entries[index].value, value, map->value_size);
             return 0;
         }
         index++;
@@ -104,7 +113,12 @@ static int _hashmap_set_entry(vf_hashmap_entry_t* entries, size_t capacity, cons
         (*plength)++;
     }
     entries[index].key = (char*)key;
-    entries[index].value = value;
+    entries[index].value = malloc(map->value_size);
+    if (entries[index].value == NULL) {
+        free((char*)key);
+        return -1;
+    }
+    memcpy(entries[index].value, value, map->value_size);
     return 1;
 }
 
@@ -119,7 +133,7 @@ static int _hashmap_expand(vf_hashmap_t* map) {
     for (size_t i = 0; i < map->capacity; ++i) {
         vf_hashmap_entry_t entry = map->entries[i];
         if (entry.key != NULL) {
-            _hashmap_set_entry(new_entries, new_capacity, entry.key, entry.value, NULL);
+            _hashmap_set_entry(map, new_entries, new_capacity, entry.key, entry.value, NULL);
         }
     }
 
@@ -130,7 +144,7 @@ static int _hashmap_expand(vf_hashmap_t* map) {
     return 0;
 }
 
-vf_hashmap_t* vf_hashmap_create(void) {
+vf_hashmap_t* vf_hashmap_create(size_t value_size) {
     vf_hashmap_t* map = (vf_hashmap_t*)malloc(sizeof(vf_hashmap_t));
     if (!map) return NULL;
 
@@ -142,21 +156,38 @@ vf_hashmap_t* vf_hashmap_create(void) {
 
     map->capacity = VF_HASH_INITIAL_CAPACITY;
     map->size = 0;
+    map->value_size = value_size;
+
     return map;
 }
 
-int vf_hashmap_insert(vf_hashmap_t* map, const char* key, void* value) {
+int vf_hashmap_set(vf_hashmap_t* map, const char* key, void* value) {
     if (map->size >= map->capacity * VF_HASH_LOAD_FACTOR) {
         if (_hashmap_expand(map) == -1) return -1;
     }
 
-    int status = _hashmap_set_entry(map->entries, map->capacity, key, value, &map->size);
+    int status = _hashmap_set_entry(map, map->entries, map->capacity, key, value, &map->size);
     if (status == -1) return -1;
 
     return 0;
 }
 
-void* vf_hashmap_get(vf_hashmap_t* map, const char* key) {
+int vf_hashmap_has(vf_hashmap_t* map, const char* key) {
+    uint64_t hash = _hash_key(key);
+    size_t index = (size_t)(hash & (uint64_t)(map->capacity - 1));
+
+    while (map->entries[index].key != NULL) {
+        if (strcmp(key, map->entries[index].key) == 0) {
+            return 1;
+        }
+        index++;
+        if (index >= map->capacity) index = 0;
+    }
+
+    return 0;
+}
+
+const void* vf_hashmap_get(vf_hashmap_t* map, const char* key) {
     uint64_t hash = _hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(map->capacity - 1));
 
@@ -171,7 +202,22 @@ void* vf_hashmap_get(vf_hashmap_t* map, const char* key) {
     return NULL;
 }
 
-void vf_hashmap_erase(vf_hashmap_t* map, const char* key) {
+void* vf_hashmap_get_mutable(vf_hashmap_t* map, const char* key) {
+    uint64_t hash = _hash_key(key);
+    size_t index = (size_t)(hash & (uint64_t)(map->capacity - 1));
+
+    while (map->entries[index].key != NULL) {
+        if (strcmp(key, map->entries[index].key) == 0) {
+            return map->entries[index].value;
+        }
+        index++;
+        if (index >= map->capacity) index = 0;
+    }
+
+    return NULL;
+}
+
+void vf_hashmap_remove(vf_hashmap_t* map, const char* key) {
     uint64_t hash = _hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(map->capacity - 1));
 
@@ -191,6 +237,7 @@ void vf_hashmap_erase(vf_hashmap_t* map, const char* key) {
 void vf_hashmap_free(vf_hashmap_t* map) {
     for (size_t i = 0; i < map->capacity; ++i) {
         free(map->entries[i].key);
+        free(map->entries[i].value);
     }
     free(map->entries);
     free(map);
