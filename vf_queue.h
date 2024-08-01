@@ -1,8 +1,9 @@
 /*
-*   vf_queue - v0.2
-*   Header-only tiny queue library.
+*   vf_queue - v0.3
+*   Header-only tiny fixed size circular queue library.
 *
 *   RECENT CHANGES:
+*       0.3     (2024-07-31)    Changed pop to return a copy;
 *       0.2     (2024-06-19)    Newline added to end of file;
 *                               Added `vf_` prefix.;
 *                               Fixed bug in `vf_queue_push`;
@@ -31,10 +32,10 @@
 *       SOFTWARE.
 *
 *   TODOs:
-*       - [ ] Rethink the way push works. Currently it points,
+*       - [x] Rethink the way push works. Currently it points,
 *             and it should copy, I think...
 *       - [ ] Push currently silently fails if full. Could be improved...
-*       - [ ] Maybe Pop should be a copy as well, because the pointer
+*       - [x] Maybe Pop should be a copy as well, because the pointer
 *             will eventually get invalidated.
 *
  */
@@ -64,7 +65,7 @@ extern size_t vf_queue_size(vf_queue_t* queue);
 extern void* vf_queue_front(vf_queue_t* queue);
 extern void* vf_queue_back(vf_queue_t* queue);
 extern void vf_queue_push(vf_queue_t* queue, void* data);
-extern void* vf_queue_pop(vf_queue_t* queue);
+extern void vf_queue_pop(vf_queue_t* queue, void* out_item);
 extern void vf_queue_free(vf_queue_t* queue);
 
 #ifdef __cplusplus
@@ -131,12 +132,15 @@ void vf_queue_push(vf_queue_t* queue, void* data) {
     queue->size++;
 }
 
-void* vf_queue_pop(vf_queue_t* queue) {
+void vf_queue_pop(vf_queue_t* queue, void* out_item) {
     if (vf_queue_empty(queue)) {
-        return NULL;
+        // Queue is empty!
+        return;
     }
 
-    void* item = (uint8_t*)queue->data + (queue->data_size * queue->front);
+    // Make a copy of the front item so we don't loose reference
+    if (!out_item) return;
+    memcpy(out_item, (uint8_t*)queue->data + (queue->data_size * queue->front), queue->data_size);
 
     if (queue->front == queue->back) {
         queue->front = -1;
@@ -146,7 +150,6 @@ void* vf_queue_pop(vf_queue_t* queue) {
     }
 
     queue->size--;
-    return item;
 }
 
 void vf_queue_free(vf_queue_t* queue) {

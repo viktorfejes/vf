@@ -81,7 +81,8 @@ TEST(Queue, Pop) {
     // Queue should be full here...
     EXPECT_TRUE(vf_queue_full(queue));
 
-    int popped_data = *(int*)vf_queue_pop(queue);
+    int popped_data;
+    vf_queue_pop(queue, &popped_data);
     EXPECT_EQ(popped_data, data1);
     EXPECT_FALSE(vf_queue_full(queue));
     EXPECT_EQ(vf_queue_size(queue), 2);
