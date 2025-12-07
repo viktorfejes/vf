@@ -6,6 +6,8 @@
 #include "test_vf_hashmap.h"
 #include "test_vf_binaryheap.h"
 #include "test_vf_sparseset.h"
+// #include "test_vf_memory_pool.h"
+#include "test_vf_thread.h"
 
 int main(void) {
     RUN_ALL_TESTS();
