@@ -35,6 +35,9 @@
 *   TODOs:
 *       - [ ] Add preprocessor to be able to set the multiplication
 *             factor when resizing hash maps.
+*       - [ ] Maybe rename to hashtable from hashmap
+*       - [ ] Make sure that there is a function for storing pointers that doesn't copy
+*       - [ ] What happens when key is passed in as 0 or null?
 *
  */
 

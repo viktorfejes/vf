@@ -11,4 +11,4 @@ Small (hopefully portable) header-only libraries that can be useful for tiny C/C
 | [vf_memory.h](/vf_memory.h) | 0.21 | Recreation of some of the standard library memory functions, like `memcpy`, `memset`, etc... |
 | [vf_queue.h](/vf_queue.h) | 0.30 | Container library for circular queue. |
 | [vf_sparseset.h](/vf_sparseset.h) | 0.10 | Container library for sparse set. Can be used for sparse-set ECS component pools. |
-| [vf_test.h](/vf_test.h) | 0.10 | Tiny unit test library for C/C++. |
+| [vf_test.h](/vf_test.h) | 1.0 | Tiny unit test library for C/C++ with auto-register capabilities. |
